@@ -55,7 +55,7 @@ export default function Home() {
                 <Layers className="icon"/>
               </div>
               <h3>Upload your room plan</h3>
-              <p>Supported format: PNG, JPG, PDF upto 10MB</p>
+              <p>Supported format: PNG, JPG, PDF upto 50MB</p>
             </div>
             <Upload onComplete={handleUploadComplete}/>
           </div>
