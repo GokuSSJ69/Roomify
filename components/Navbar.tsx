@@ -9,7 +9,7 @@ const Navbar = () => {
         try {
             await signOut();
         } catch (e) {
-            console.error(`Puter sign out error: ${e}`)
+            console.error('Puter sign out error:', e)
         }
 
         return;
@@ -18,7 +18,7 @@ const Navbar = () => {
     try {
         await signIn();
     } catch (e) {
-        console.error(`Puter sign in error: ${e}`)
+        console.error('Puter sign in error:', e)
     }
   };
 

@@ -9,8 +9,8 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import { useInsertionEffect, useState } from "react";
-import { getCurrentUser, sigIn as puterSignIn, signOut as puterSignOut } from "../lib/puter.action";
+import { useEffect, useState } from "react";
+import { getCurrentUser, signIn as puterSignIn, signOut as puterSignOut } from "../lib/puter.action";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -44,15 +44,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 const DEFAULT_AUTH_STATE: AuthState = {
-    userName: null,
-    isSignedIn: false,
-    userId:null,
+  userName: null,
+  isSignedIn: false,
+  userId: null,
 }
 
 export default function App() {
   const [authState, setAuthState] = useState<AuthState>(DEFAULT_AUTH_STATE);
 
   const refreshAuth = async () => {
+    if (typeof window === "undefined") return false;
     try {
       const user = await getCurrentUser();
 
@@ -69,30 +70,30 @@ export default function App() {
     }
   }
 
-  useInsertionEffect(() => {
+  useEffect(() => {
     refreshAuth()
   }, []);
 
   const signIn = async () => {
     await puterSignIn();
-    return await refreshAuth(); 
+    return await refreshAuth();
   }
 
   const signOut = async () => {
-    puterSignOut();
+    await puterSignOut();
     return await refreshAuth();
   }
-  
+
   return (
     <main className="min-h-screen bg-background text-foreground relative z-10">
       <Outlet
-      context={{
-        ...authState,
-        signIn,
-        signOut,
-        refreshAuth,
-      }}
-       />
+        context={{
+          ...authState,
+          signIn,
+          signOut,
+          refreshAuth,
+        }}
+      />
     </main>
   )
 }
