@@ -4,8 +4,8 @@ import { Button } from "../../components/ui/Button";
 import type { Route } from "./+types/home";
 import Upload from "../../components/Upload";
 import { useNavigate } from "react-router";
-import { useState } from "react";
-import { createProject } from "../../lib/puter.action";
+import { useState, useRef, useEffect } from "react";
+import { getProject } from "../../lib/puter.action";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -17,33 +17,36 @@ export function meta({ }: Route.MetaArgs) {
 export default function Home() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<DesignItem[]>([]);
+  const isCreateProjectRef = useRef(false);
 
   const handleUploadComplete = async (base64Image: string) => {
-    const newId = Date.now().toString();
-    const name = `Residence ${newId}`;
-    const newItem = {
-      id: newId,
-      name,
-      sourceImage: base64Image, renderedImage: undefined, timestamp: Date.now()
-    };
+    if(isCreateProjectRef.current) return false;
+    isCreateProjectRef.current = true;
 
-    const saved = await createProject({ item: newItem, visibility: 'private' });
-    if (!saved) {
-      console.error('Failed to save project');
-      return false;
+    try {
+      const newId = Date.now().toString();
+      const name = `Residence ${newId}`;
+      navigate(`/visualizer/${newId}`, {
+        state: {
+          initialImage: base64Image,
+          initialRender: null,
+          name,
+        } satisfies VisualizerLocationState
+      });
+
+      return true;
+    } finally {
+      isCreateProjectRef.current = false;
     }
-
-
-    setProjects((prev) => [saved, ...prev]);
-    navigate(`/visualizer/${newId}`, {
-      state: {
-        initialImage: saved.sourceImage,
-        initialRender: saved.renderedImage || null,
-        name
-      }
-    });
-    return true;
   };
+
+  useEffect(()=>{
+    const fetchProjects = async()=>{
+      const item = await getProject();
+      setProjects(item);
+    }
+    fetchProjects();
+  },[]);
 
   return (
     <div className="home">
@@ -95,7 +98,7 @@ export default function Home() {
           </div>
           <div className="projects-grid">
             {projects.map(({id, name, renderedImage, sourceImage, timestamp}) => (
-                <div key={id} className="project-card group">
+                <div key={id} className="project-card group" onClick={() => navigate(`/visualizer/${id}`)}>
                 <div className="preview">
                   <img src={renderedImage || sourceImage} alt="images" />
                   <div className="badge">

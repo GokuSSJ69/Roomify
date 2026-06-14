@@ -1,4 +1,4 @@
-import puter from "@heyputer/puter.js";
+import { getPuter } from "./puter.client";
 import { ROOMIFY_RENDER_PROMPT } from "./constants";
 
 export async function fetchAsDataUrl(url: string): Promise<string> {
@@ -28,6 +28,7 @@ export const gerenate3DView = async ({ sourceImage }: Generate3DViewParams) => {
 
     if (!mimeType || !base64Data) throw new Error('Could not parse data URL');
 
+    const puter = await getPuter();
     const response = await puter.ai.txt2img(ROOMIFY_RENDER_PROMPT, {
         provider: 'gemini',
         model: 'gemini-2.5-flash-image-preview',
